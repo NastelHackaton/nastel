@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use App\Models\Repository;
+use App\Services\RepositoryDataService;
 use Illuminate\Support\Facades\Http;
 
 class RepositoryController extends Controller
 {
+    public function __construct(protected RepositoryDataService $repositoryDataService) {}
+
     public function store()
     {
         $data = request()->validate([
@@ -18,10 +22,9 @@ class RepositoryController extends Controller
         $repositoryData = Http::withToken($user->github_token)
             ->get("https://api.github.com/repositories/{$data['github_repo_id']}");
 
-        \App\Models\Repository::firstOrCreate([
+        Repository::firstOrCreate([
             'github_repo_id' => $data['github_repo_id'],
             'user_id' => $user->id,
-
             'name' => $repositoryData['name'],
             'language' => $repositoryData['language'],
             'visibility' => $repositoryData['private'] ? 'Private' : 'Public',
@@ -35,10 +38,19 @@ class RepositoryController extends Controller
         ]);
     }
 
-    public function show(\App\Models\Repository $repository)
+    public function show(Repository $repository)
     {
+        $categories = $this->repositoryDataService->getCategories();
+        $overallHealth = $this->repositoryDataService->getOverallHealth();
+        $additionalData = $this->repositoryDataService->getAdditionalData();
+        $healthData = $this->repositoryDataService->getHealthData();
+        
         return inertia('Repository/Show', [
             'repository' => $repository,
+            'categories' => $categories,
+            'overallHealth' => $overallHealth,
+            'healthData' => $healthData,
+            'additionalData' => $additionalData,
         ]);
     }
 }
