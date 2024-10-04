@@ -27,6 +27,16 @@ Route::middleware('auth')->group(function () {
     ])->name('repositories.show');
 
 
+    Route::get('/repositories/{repository}/tasks', [
+        \App\Http\Controllers\RepositoryTaskController::class,
+        'index'
+    ])->name('repositories.tasks.index');
+
+    Route::get('/repositories/{repository}/tasks/{task}', [
+        \App\Http\Controllers\RepositoryTaskController::class,
+        'show'
+    ])->name('repositories.tasks.show');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

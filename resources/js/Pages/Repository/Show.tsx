@@ -1,4 +1,3 @@
-import { Badge } from '@/Components/ui/Badge';
 import { Button } from '@/Components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/Card';
 import { Progress } from '@/Components/ui/Progress';
@@ -21,7 +20,13 @@ function getQualityColor(value: number) {
     return 'bg-red-500';
 }
 
-function CategoryCard({ category }: { category: Category }) {
+function CategoryCard({
+    repository,
+    category,
+}: {
+    repository: Repository;
+    category: Category;
+}) {
     const Icon = category.icon;
     const qualityColor = getQualityColor(category.value);
 
@@ -43,7 +48,11 @@ function CategoryCard({ category }: { category: Category }) {
                     indicatorClassName={qualityColor}
                 />
                 <div className="flex justify-between items-center mt-4">
-                    <Link href="/repository/tasks">
+                    <Link
+                        href={route('repositories.tasks.index', {
+                            repository: repository.id,
+                        })}
+                    >
                         <Button
                             size="sm"
                             className="text-white bg-purple-600 hover:bg-purple-700"
@@ -141,26 +150,35 @@ export default function RepositoryShow({
                                     Good
                                 </div>
                             </div>
-                            <HealthGraph data={healthData} /> {/* Passato data */}
+                            <HealthGraph data={healthData} />{' '}
+                            {/* Passato data */}
                         </div>
                         <Progress value={overallHealth} className="h-2" />
                     </CardContent>
                 </Card>
 
                 <h2 className="text-xl font-bold text-white">Categories</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {categories.map((category) => (
-                        <CategoryCard key={category.name} category={category} />
+                        <CategoryCard
+                            key={category.name}
+                            category={category}
+                            repository={repository}
+                        />
                     ))}
                 </div>
 
                 <Card className="bg-gray-800 border-gray-700">
                     <CardContent>
-                        <h3 className="text-xl font-bold text-white">Additional Data</h3>
+                        <h3 className="text-xl font-bold text-white">
+                            Additional Data
+                        </h3>
                         <ul className="mt-4 text-gray-400">
                             <li>Contributors: {additionalData.contributors}</li>
                             <li>Issues: {additionalData.issues}</li>
-                            <li>Pull Requests: {additionalData.pullRequests}</li>
+                            <li>
+                                Pull Requests: {additionalData.pullRequests}
+                            </li>
                         </ul>
                     </CardContent>
                 </Card>
