@@ -1,0 +1,37 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+
+Route::middleware('guest')->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('Welcome');
+    })->name('welcome');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [
+        \App\Http\Controllers\DashboardController::class,
+        'index',
+    ])->name('dashboard');
+
+    Route::post('/repositories', [
+        \App\Http\Controllers\RepositoryController::class,
+        'store'
+    ])->name('repositories.store');
+
+    Route::get('/repositories/{repository}', [
+        \App\Http\Controllers\RepositoryController::class,
+        'show'
+    ])->name('repositories.show');
+
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__ . '/auth.php';
