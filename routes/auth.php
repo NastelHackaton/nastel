@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Inertia\Inertia;
 
+const GITHUB_NAME_FALLBACK = 'Unnamed GitHub User';
+
 Route::middleware('guest')->group(function () {
     Route::get('login', function () {
         return Inertia::render('Auth/Login');
@@ -24,7 +26,7 @@ Route::middleware('guest')->group(function () {
         $user = User::updateOrCreate([
             'github_id' => $githubUser->id,
         ], [
-            'name' => $githubUser->name,
+            'name' => $githubUser->name ?? GITHUB_NAME_FALLBACK,
             'email' => $githubUser->email,
             'github_token' => $githubUser->token,
             'github_image_url' => $githubUser->avatar
