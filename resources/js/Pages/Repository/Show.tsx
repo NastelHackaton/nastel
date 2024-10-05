@@ -1,3 +1,4 @@
+import { Badge } from '@/Components/ui/Badge';
 import { Button } from '@/Components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/Card';
 import { Progress } from '@/Components/ui/Progress';
@@ -31,12 +32,12 @@ function CategoryCard({
     const qualityColor = getQualityColor(category.value);
 
     return (
-        <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="flex flex-row justify-between items-center pb-2 space-y-0">
+        <Card className="border-gray-700 bg-gray-800">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-white">
                     {category.name}
                 </CardTitle>
-                <Icon className="w-4 h-4 text-gray-400" />
+                <Icon className="h-4 w-4 text-gray-400" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold text-white">
@@ -47,7 +48,7 @@ function CategoryCard({
                     className="mt-4 h-2"
                     indicatorClassName={qualityColor}
                 />
-                <div className="flex justify-between items-center mt-4">
+                <div className="mt-4 flex items-center justify-between">
                     <Link
                         href={route('repositories.tasks.index', {
                             repository: repository.id,
@@ -55,10 +56,10 @@ function CategoryCard({
                     >
                         <Button
                             size="sm"
-                            className="text-white bg-purple-600 hover:bg-purple-700"
+                            className="bg-purple-600 text-white hover:bg-purple-700"
                         >
                             View Tasks{' '}
-                            <span className="py-0.5 px-1.5 ml-1 text-xs bg-purple-700 rounded-full">
+                            <span className="ml-1 rounded-full bg-purple-700 px-1.5 py-0.5 text-xs">
                                 {category.tasks}
                             </span>
                         </Button>
@@ -118,6 +119,13 @@ type RepositoryShowProps = {
         issues: number;
         pullRequests: number;
     };
+    tasks: {
+        id: BigInteger;
+        name: string;
+        category: string;
+        status: string;
+        isNew: boolean;
+    }[];
 };
 
 export default function RepositoryShow({
@@ -126,22 +134,26 @@ export default function RepositoryShow({
     overallHealth,
     healthData,
     additionalData,
+    tasks,
 }: PageProps<RepositoryShowProps>) {
     return (
         <AuthenticatedLayout>
             <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-white">
-                    Repository: {repository.name}
-                </h2>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-3xl font-bold text-white">
+                        Repository: {repository.name}
+                    </h2>
+                </div>
 
-                <Card className="bg-gray-800 border-gray-700">
+                {/* Repository Health Card */}
+                <Card className="border-gray-700 bg-gray-800">
                     <CardHeader>
                         <CardTitle className="text-2xl font-bold text-white">
                             Overall Repository Health
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="mb-4 flex items-center justify-between">
                             <div>
                                 <div className="text-6xl font-bold text-white">
                                     {overallHealth}%
@@ -150,15 +162,21 @@ export default function RepositoryShow({
                                     Good
                                 </div>
                             </div>
-                            <HealthGraph data={healthData} />{' '}
+                            <div>
+                                <HealthGraph data={healthData} />{' '}
+                            </div>
                             {/* Passato data */}
                         </div>
-                        <Progress value={overallHealth} className="h-2" />
+                        <Progress
+                            value={overallHealth}
+                            className="h-4"
+                            indicatorClassName="bg-gradient-to-r from-yellow-500 via-green-500 to-green-600"
+                        />
                     </CardContent>
                 </Card>
 
-                <h2 className="text-xl font-bold text-white">Categories</h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {/* Categories Section */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {categories.map((category) => (
                         <CategoryCard
                             key={category.name}
@@ -168,18 +186,84 @@ export default function RepositoryShow({
                     ))}
                 </div>
 
-                <Card className="bg-gray-800 border-gray-700">
+                {/* Tasks Section */}
+                <Card className="border-gray-700 bg-gray-800">
+                    <CardHeader>
+                        <CardTitle className="text-white">
+                            Tasks to Improve Codebase
+                        </CardTitle>
+                    </CardHeader>
                     <CardContent>
-                        <h3 className="text-xl font-bold text-white">
-                            Additional Data
-                        </h3>
-                        <ul className="mt-4 text-gray-400">
-                            <li>Contributors: {additionalData.contributors}</li>
-                            <li>Issues: {additionalData.issues}</li>
-                            <li>
-                                Pull Requests: {additionalData.pullRequests}
-                            </li>
+                        <ul className="space-y-4">
+                            {tasks.map((task, index) => (
+                                <li
+                                    key={index}
+                                    className="flex items-center justify-between rounded-lg bg-gray-700 p-4"
+                                >
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-white">
+                                            {task.name}
+                                        </span>
+                                        <div className="mt-1 flex items-center space-x-2">
+                                            <Badge
+                                                variant="secondary"
+                                                className="bg-gray-600 text-gray-200"
+                                            >
+                                                {task.category}
+                                            </Badge>
+                                            {task.status === 'in-progress' && (
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="bg-yellow-600 text-yellow-100"
+                                                >
+                                                    In Progress
+                                                </Badge>
+                                            )}
+                                            {task.isNew && (
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="bg-purple-600 text-purple-100"
+                                                >
+                                                    New
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <Link
+                                        href={`/repositories/${repository.id}/tasks/${task.id}`}
+                                    >
+                                        <Button
+                                            size="sm"
+                                            className="bg-purple-600 text-white hover:bg-purple-700"
+                                        >
+                                            Work on it
+                                        </Button>
+                                    </Link>
+                                </li>
+                            ))}
                         </ul>
+                        <Link href="/repository/tasks">
+                            <Button
+                                size="lg"
+                                className="mt-10 bg-purple-600 text-white hover:bg-purple-700"
+                            >
+                                View All
+                            </Button>
+                        </Link>
+                        <CardHeader className="flex flex-row items-center justify-center space-y-0 pb-2">
+                            <CardTitle className="text-white">
+                                Additional Data:
+                            </CardTitle>
+                        </CardHeader>
+                        <div className="mt-4 flex justify-center space-x-4 text-gray-400">
+                            <span>
+                                Contributors: {additionalData.contributors}
+                            </span>
+                            <span>Issues: {additionalData.issues}</span>
+                            <span>
+                                Pull Requests: {additionalData.pullRequests}
+                            </span>
+                        </div>
                     </CardContent>
                 </Card>
             </div>

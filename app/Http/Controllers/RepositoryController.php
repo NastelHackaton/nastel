@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use Auth;
 use App\Models\Repository;
-use App\Services\RepositoryDataService;
+use App\Services\TaskService;
 use Illuminate\Support\Facades\Http;
+use App\Services\RepositoryDataService;
 
 class RepositoryController extends Controller
 {
-    public function __construct(protected RepositoryDataService $repositoryDataService) {}
+    public function __construct(
+        protected RepositoryDataService $repositoryDataService,
+        protected TaskService $taskService,
+    ) {}
 
     public function store()
     {
@@ -44,13 +48,15 @@ class RepositoryController extends Controller
         $overallHealth = $this->repositoryDataService->getOverallHealth();
         $additionalData = $this->repositoryDataService->getAdditionalData();
         $healthData = $this->repositoryDataService->getHealthData();
-        
+        $tasks = $this->taskService->getTasksForRepository($repository->id);
+
         return inertia('Repository/Show', [
             'repository' => $repository,
             'categories' => $categories,
             'overallHealth' => $overallHealth,
             'healthData' => $healthData,
             'additionalData' => $additionalData,
+            'tasks' => $tasks
         ]);
     }
 }
